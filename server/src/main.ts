@@ -6,12 +6,14 @@ import * as cookieParser  from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.use(cookieParser());
+  app.enableCors();
+
+  app.use(cookieParser("secret"));
 
   const options = new DocumentBuilder()
     .setTitle('JavaScript Experiments')
     .setVersion('1.0')
-    .addCookieAuth()
+    .addCookieAuth("sessionId")
     .build();
 
   const document = SwaggerModule.createDocument(app, options);
