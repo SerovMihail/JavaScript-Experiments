@@ -14,8 +14,9 @@ import { LoginResponseDto } from './models/LoginResponseDto';
 import { Request } from 'express';
 import { IsAuthenticatedGuard } from './guards/IsAuthenticatedGuard';
 
-@Controller('login')
+@Controller('auth')
 export default class AuthController {
+
   @Post()
   @ApiResponse({ type: LoginResponseDto, status: 201 })
   async login(
