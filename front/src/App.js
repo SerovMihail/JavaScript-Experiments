@@ -1,37 +1,47 @@
 import React from "react";
-import logo from "./logo.svg";
+import { useAsync } from "react-async";
+import ReactJkMusicPlayer from "react-jinke-music-player";
+import Parser from "rss-parser";
 import "./App.css";
-import { useForm } from "react-hook-form";
+import logo from "./logo.svg";
+import "react-jinke-music-player/assets/index.css";
+
+const loadItCoolerRssFeed = async () => {
+  let parser = new Parser();
+  return await parser.parseURL("https://anchor.fm/s/132605f8/podcast/rss");
+};
 
 function App() {
-  const { register, handleSubmit, errors } = useForm();
-  const onSubmit = async (data) => {
-    const result = await fetch("http://localhost:3001/login", {
-      headers: {
-        "Content-Type": "application/json;charset=utf-8",
-      },
-      body: JSON.stringify(data),
-      method: "POST",
-    });
-    console.log(result.json());
-  };
+  const { data, error, isLoading } = useAsync({
+    promiseFn: loadItCoolerRssFeed,
+  });
+
+  if (isLoading) return "Loading...";
+  if (error) return `Something went wrong: ${error.message}`;
+  if (data) console.log(data);
 
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+        <img src={logo} alt="logo" />
+        
+        
+        <ul>
+          {data.items.map((podcastItem) => (
+            <div key={podcastItem.guid} className="row">
+              <div>
+                <p>{podcastItem.title}</p>
+              </div>
+            </div>
+          ))}
+        </ul>
 
-        <form className="form" onSubmit={handleSubmit(onSubmit)}>
-          {/* register your input into the hook by invoking the "register" function */}
-          <input name="email" defaultValue="test" ref={register} />
-
-          {/* include validation with required or other standard HTML validation rules */}
-          <input name="password" ref={register({ required: true })} />
-          {/* errors will return when field validation fails  */}
-          {errors.exampleRequired && <span>This field is required</span>}
-
-          <input type="submit" />
-        </form>
+        <ReactJkMusicPlayer
+          audioLists={[
+            ...data.items.map((podcastItem) => podcastItem.enclosure.url),
+          ]}
+          autoPlay={false}
+        />
       </header>
     </div>
   );
